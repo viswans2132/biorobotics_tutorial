@@ -28,7 +28,7 @@ def generate_launch_description():
 
     # Complete file name of the xacro file.
     xacro_file = os.path.join(pkg_robot, 'models', 'box.xacro')
-    assert os.path.exists(xacro_file), "The file path seems to be wrong: "+str(xacro_file)
+    assert os.path.exists(xacro_file), "File not found: "+str(xacro_file)
 
     # Process the xacro file to generate URDF and extract the robot description.
     robot_desc_config = xacro.process_file(xacro_file)
@@ -47,7 +47,7 @@ def generate_launch_description():
     return LaunchDescription([
         # Add the gazebo node.
         gazebo,
-        # Add the spawning node of our package to spawn the object defined by the robot description.
+        # Add the spawning node with the object defined by the robot description.
         Node(
             package='biorobotics_tutorial',
             executable='spawn_bot',
