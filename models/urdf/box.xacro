@@ -2,8 +2,8 @@
 
 <robot name="box" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:property name="box_name" value="$(arg box_name)" />
-  <xacro:property name="mass" value="0.01" />
+  <xacro:property name="box_name" value="robot" />
+  <xacro:property name="mass" value="0.5" />
 
   <!-- Macro for the inertia of a box -->
   <xacro:macro name="box_inertia" params="x y z mass">
@@ -23,19 +23,19 @@
 
 <link name="${box_name}/base_link" />
 <link name="${box_name}/box">
-  <xacro:box_inertial x="10.1" y="10.1" z="0.01" mass="$(arg mass)">
+  <xacro:box_inertial x="0.1" y="0.1" z="0.1" mass="$(mass)">
     <origin xyz="0 0 0" />
   </xacro:box_inertial>
   <visual>
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <box size="10.1 10.1 0.01"/> 
+      <box size="0.1 0.1 0.1"/> 
     </geometry>
   </visual>
   <collision>
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <box size="10.1 10.1 0.01"/> 
+      <box size="0.1 0.1 0.1"/> 
      </geometry>
      <surface>
         <friction>
@@ -50,8 +50,8 @@
 
   <gazebo reference="${box_name}/box">
     <material>Gazebo/White</material> 
-      <mu1>5000.01</mu1>
-      <mu2>5000.01</mu2>
+      <mu1>5.01</mu1>
+      <mu2>5.01</mu2>
   </gazebo>
 
   <joint name="${box_name}/base_joint" type="fixed">
