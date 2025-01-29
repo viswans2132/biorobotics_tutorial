@@ -23,7 +23,7 @@
 
 <link name="${box_name}/base_link" />
 <link name="${box_name}/box">
-  <xacro:box_inertial x="0.1" y="0.1" z="0.1" mass="$(mass)">
+  <xacro:box_inertial x="0.1" y="0.1" z="0.1" mass="${mass}">
     <origin xyz="0 0 0" />
   </xacro:box_inertial>
   <visual>
