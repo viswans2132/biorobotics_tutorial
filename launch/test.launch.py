@@ -15,7 +15,7 @@ def generate_launch_description():
     namespace = 'robot'
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
-    pkg_robot = get_package_share_directory('gazebo_urdf_tutorial')
+    pkg_robot = get_package_share_directory('biorobotics_tutorial')
     xacro_file = os.path.join(pkg_robot, 'models', 'box.xacro')
     assert os.path.exists(xacro_file), "The file path seems to be wrong: "+str(xacro_file)
     # world_file = os.path.join(pkg_gazebo_ros, 'worlds', 'empty.world')
