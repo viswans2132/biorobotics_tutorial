@@ -43,9 +43,11 @@ def generate_launch_description():
             launch_arguments={'pause': 'false'}.items()
             )
 
-    # Returning the launch descriptions, where the nodes are added.
+    # Return the launch descriptions, where the nodes are added.
     return LaunchDescription([
+        # Add the gazebo node.
         gazebo,
+        # Add the spawning node of our package to spawn the object defined by the robot description.
         Node(
             package='biorobotics_tutorial',
             executable='spawn_bot',
@@ -53,6 +55,7 @@ def generate_launch_description():
             arguments=[robot_desc, '0.0', '0.0', '0.5'],
             output='screen'
         ),
+        # Add the robot state publisher node.
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
