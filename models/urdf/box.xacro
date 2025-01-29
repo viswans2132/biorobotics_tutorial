@@ -2,6 +2,7 @@
 
 <robot name="box" xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- Property Definition: Referred to using ${property_name} -->
   <xacro:property name="box_name" value="robot" />
   <xacro:property name="mass" value="0.5" />
 
@@ -21,39 +22,41 @@
     </inertial>
   </xacro:macro>
 
+<!-- Link Definitions (Virtual Link) -->
 <link name="${box_name}/base_link" />
+
+<!-- Link Definitions (Actual Link) -->
 <link name="${box_name}/box">
+  <!-- Inertial block (uses box_inertial macro) -->
   <xacro:box_inertial x="0.1" y="0.1" z="0.1" mass="${mass}">
     <origin xyz="0 0 0" />
   </xacro:box_inertial>
+
+  <!-- Visual block -->
   <visual>
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
       <box size="0.1 0.1 0.1"/> 
     </geometry>
   </visual>
+
+  <!-- Collision block -->
   <collision>
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
       <box size="0.1 0.1 0.1"/> 
      </geometry>
-     <surface>
-        <friction>
-          <ode>
-            <mu>5000</mu>
-            <mu2>5000</mu2>
-          </ode>
-        </friction>
-      </surface>
   </collision>
 </link>
 
+  <!-- Gazebo specific properties for the box link -->
   <gazebo reference="${box_name}/box">
     <material>Gazebo/White</material> 
       <mu1>5.01</mu1>
       <mu2>5.01</mu2>
   </gazebo>
 
+  <!-- Joint between the virtual link and the actual link -->
   <joint name="${box_name}/base_joint" type="fixed">
     <origin xyz="0.0 0 0.0" rpy="0 0 0" />
     <parent link="${box_name}/base_link" />
