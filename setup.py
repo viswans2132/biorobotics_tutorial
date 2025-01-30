@@ -24,7 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        'spawn_bot = biorobotics_tutorial.spawn_bot:main'
+        'spawn_bot = biorobotics_tutorial.spawn_bot:main',
+        'two_link_controller = biorobotics_tutorial.two_link_controller:main'
         ],
     },
 )
