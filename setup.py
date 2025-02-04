@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
         'spawn_bot = biorobotics_tutorial.spawn_bot:main',
         'two_link_controller = biorobotics_tutorial.two_link_controller:main'
+        'two_link_pid_controller = biorobotics_tutorial.two_link_pid_controller:main'
         ],
     },
 )

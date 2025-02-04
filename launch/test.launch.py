@@ -12,6 +12,11 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 import xacro
 
+# New libraries
+from launch.actions import ExecuteProcess
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessExit
+
 
 # Method to generate launch description
 def generate_launch_description():
@@ -27,7 +32,7 @@ def generate_launch_description():
     pkg_robot = get_package_share_directory('biorobotics_tutorial')
 
     # Complete file name of the xacro file.
-    xacro_file = os.path.join(pkg_robot, 'models', 'box.xacro')
+    xacro_file = os.path.join(pkg_robot, 'models', 'two_link.xacro')
     assert os.path.exists(xacro_file), "File not found: "+str(xacro_file)
 
     # Process the xacro file to generate URDF and extract the robot description.
@@ -40,21 +45,46 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(pkg_gazebo_ros, 'launch', 'gazebo.launch.py'),
                 ),
-            launch_arguments={'pause': 'false'}.items()
+            launch_arguments={'pause': 'true'}.items()
             )
-
-    # Return the launch descriptions, where the nodes are added.
-    return LaunchDescription([
-        # Add the gazebo node.
-        gazebo,
-        # Add the spawning node with the object defined by the robot description.
-        Node(
+    spawning_node = Node(
             package='biorobotics_tutorial',
             executable='spawn_bot',
             name='robot_spawner',
             arguments=[robot_desc, '0.0', '0.0', '0.5'],
             output='screen'
+        )
+
+    load_joint_state_broadcaster = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'joint_state_broadcaster'],
+        output='screen'
+    )
+
+    load_joint_trajectory_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'position_controller'],
+        output='screen'
+    )
+
+    # Return the launch descriptions, where the nodes are added.
+    return LaunchDescription([
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=spawning_node,
+                on_exit=[load_joint_state_broadcaster],
+            )
         ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_state_broadcaster,
+                on_exit=[load_joint_trajectory_controller],
+            )
+        ),
+
+        # Add the gazebo node.
+        gazebo,
+        # Add the spawning node with the object defined by the robot description.
+        spawning_node,
         # Add the robot state publisher node.
         Node(
             package='robot_state_publisher',
