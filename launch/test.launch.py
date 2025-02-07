@@ -32,7 +32,7 @@ def generate_launch_description():
     pkg_robot = get_package_share_directory('biorobotics_tutorial')
 
     # Complete file name of the xacro file.
-    xacro_file = os.path.join(pkg_robot, 'models', 'two_link.xacro')
+    xacro_file = os.path.join(pkg_robot, 'models', 'two_link_1.xacro')
     assert os.path.exists(xacro_file), "File not found: "+str(xacro_file)
 
     # Process the xacro file to generate URDF and extract the robot description.
@@ -62,7 +62,8 @@ def generate_launch_description():
     )
 
     load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'position_controller'],
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'joint_trajectory_controller'],
         output='screen'
     )
 

@@ -119,7 +119,7 @@
   <!-- Gazebo plugin to enable control of joints -->
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find biorobotics_tutorial)/models/two_link_config.yaml</parameters>
+      <parameters>$(find biorobotics_tutorial)/models/two_link_config_1.yaml</parameters>
     </plugin>
   </gazebo>
 </robot>
