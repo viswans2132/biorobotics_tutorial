@@ -1,0 +1,255 @@
+<?xml version="1.0"?>
+
+<robot name="two_link" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Property Definition: Referred to using ${property_name} -->
+  <xacro:property name="box_name" value="robot" />
+  <xacro:property name="mass" value="0.5" />
+
+  <!-- Macro for the inertia of a box -->
+  <xacro:macro name="box_inertia" params="x y z mass">
+    <inertia ixx="${0.0833333 * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (x*x + z*z)}" iyz="0.0"
+      izz="${0.0833333 * mass * (x*x + y*y)}" />
+  </xacro:macro>
+
+    <!-- Macro for the inertial properties of a box -->
+  <xacro:macro name="box_inertial" params="x y z mass *origin">
+    <inertial>
+      <mass value="${mass}" />
+      <xacro:insert_block name="origin" />
+      <xacro:box_inertia x="${x}" y="${y}" z="${z}" mass="${mass}" />
+    </inertial>
+  </xacro:macro>
+
+<!-- Link Definitions (Virtual Link) -->
+<link name="${box_name}/base_link" />
+
+<!-- Link Definitions (Actual Link) -->
+<link name="${box_name}/box">
+  <!-- Inertial block (uses box_inertial macro) -->
+  <xacro:box_inertial x="0.6" y="0.3" z="0.15" mass="${mass}">
+    <origin xyz="0 0 0" />
+  </xacro:box_inertial>
+
+  <!-- Visual block -->
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <geometry>
+      <box size="0.6 0.3 0.15"/> 
+    </geometry>
+  </visual>
+
+  <!-- Collision block -->
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <geometry>
+      <box size="0.6 0.3 0.15"/> 
+     </geometry>
+  </collision>
+</link>
+
+  <!-- Gazebo specific properties for the box link -->
+  <gazebo reference="${box_name}/box">
+    <material>Gazebo/White</material> 
+      <mu1>5.01</mu1>
+      <mu2>5.01</mu2>
+  </gazebo>
+
+  <!-- Joint between the virtual link and the actual link -->
+  <joint name="${box_name}/base_joint" type="fixed">
+    <origin xyz="0.0 0 0.0" rpy="0 0 0" />
+    <parent link="${box_name}/base_link" />
+    <child link="${box_name}/box" />
+  </joint>
+
+  <link name="${box_name}/arm1">
+    <!-- Visual block -->
+    <visual>
+      <origin xyz="0.1 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </visual>
+    <!-- Collision block -->
+    <collision>
+      <origin xyz="0.1 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </collision>
+    <!-- Inertial block (uses box_inertial macro) -->
+    <xacro:box_inertial x="0.3" y="0.05" z="0.05" mass="${mass}">
+      <origin xyz="0.1 0 0" />
+    </xacro:box_inertial>
+  </link>
+  <link name="${box_name}/arm11">
+    <!-- Visual block -->
+    <visual>
+      <origin xyz="0.125 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </visual>
+    <!-- Collision block -->
+    <collision>
+      <origin xyz="0.125 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </collision>
+    <!-- Inertial block (uses box_inertial macro) -->
+    <xacro:box_inertial x="0.3" y="0.05" z="0.05" mass="${mass}">
+      <origin xyz="0.125 0 0" />
+    </xacro:box_inertial>
+  </link>
+
+  <link name="${box_name}/arm2">
+    <!-- Visual block -->
+    <visual>
+      <origin xyz="0.1 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </visual>
+    <!-- Collision block -->
+    <collision>
+      <origin xyz="0.1 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </collision>
+    <!-- Inertial block (uses box_inertial macro) -->
+    <xacro:box_inertial x="0.3" y="0.05" z="0.05" mass="${mass}">
+      <origin xyz="0.1 0 0" />
+    </xacro:box_inertial>
+  </link>
+  <link name="${box_name}/arm22">
+    <!-- Visual block -->
+    <visual>
+      <origin xyz="0.125 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </visual>
+    <!-- Collision block -->
+    <collision>
+      <origin xyz="0.125 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.05 0.05"/> 
+      </geometry>
+    </collision>
+    <!-- Inertial block (uses box_inertial macro) -->
+    <xacro:box_inertial x="0.3" y="0.05" z="0.05" mass="${mass}">
+      <origin xyz="0.125 0 0" />
+    </xacro:box_inertial>
+  </link>
+
+  <!-- Joint between the first link and the new link -->
+  <joint name="${box_name}/link_joint1" type="revolute">
+    <origin xyz="0.0 -0.175 -0.0" rpy="0 0 0" />
+    <parent link="${box_name}/box" />
+    <child link="${box_name}/arm1" />
+    <axis xyz="0 -1 0" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
+    <dynamics damping="0.0" friction="0.1"/>
+  </joint>
+  <!-- Joint between the first link and the new link -->
+  <joint name="${box_name}/link_joint11" type="revolute">
+    <origin xyz="0.225 -0.05 0.0" rpy="0 0 0" />
+    <parent link="${box_name}/arm1" />
+    <child link="${box_name}/arm11" />
+    <axis xyz="0 -1 0" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
+    <dynamics damping="0.0" friction="0.1"/>
+  </joint>
+  <!-- Gazebo specific properties for the arm link -->
+  <gazebo reference="${box_name}/arm1">
+    <material>Gazebo/Blue</material> 
+  </gazebo>
+  <!-- Gazebo specific properties for the arm link -->
+  <gazebo reference="${box_name}/arm11">
+    <material>Gazebo/Blue</material> 
+  </gazebo>
+
+    <!-- Joint between the first link and the new link -->
+  <joint name="${box_name}/link_joint2" type="revolute">
+    <origin xyz="0.0 0.175 0.0" rpy="0 0 0" />
+    <parent link="${box_name}/box" />
+    <child link="${box_name}/arm2" />
+    <axis xyz="0 -1 0" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
+    <dynamics damping="0.0" friction="0.1"/>
+  </joint>
+  <!-- Joint between the first link and the new link -->
+  <joint name="${box_name}/link_joint22" type="revolute">
+    <origin xyz="0.225 0.05 0.0" rpy="0 0 0" />
+    <parent link="${box_name}/arm2" />
+    <child link="${box_name}/arm22" />
+    <axis xyz="0 -1 0" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
+    <dynamics damping="0.0" friction="0.1"/>
+  </joint>
+  <!-- Gazebo specific properties for the arm link -->
+  <gazebo reference="${box_name}/arm2">
+    <material>Gazebo/Green</material> 
+  </gazebo>
+
+  <!-- Gazebo specific properties for the arm link -->
+  <gazebo reference="${box_name}/arm22">
+    <material>Gazebo/Green</material> 
+  </gazebo>
+
+  <!-- Interface the plugin with the movable joints -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="${box_name}/link_joint1">
+      <param name="pos_kp">4</param>
+      <param name="pos_ki">1</param>
+      <param name="pos_kd">1</param>
+      <param name="pos_max_integral_error">1</param>
+      <command_interface name="position_pid"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="${box_name}/link_joint2">
+      <param name="pos_kp">4</param>
+      <param name="pos_ki">1</param>
+      <param name="pos_kd">1</param>
+      <param name="pos_max_integral_error">1</param>
+      <command_interface name="position_pid"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="${box_name}/link_joint11">
+      <param name="pos_kp">20</param>
+      <param name="pos_ki">1</param>
+      <param name="pos_kd">1</param>
+      <param name="pos_max_integral_error">1</param>
+      <command_interface name="position_pid"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="${box_name}/link_joint22">
+      <param name="pos_kp">20</param>
+      <param name="pos_ki">1</param>
+      <param name="pos_kd">1</param>
+      <param name="pos_max_integral_error">1</param>
+      <command_interface name="position_pid"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+  <!-- Gazebo plugin to enable control of joints -->
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find biorobotics_tutorial)/models/four_links_config.yaml</parameters>
+    </plugin>
+  </gazebo>
+</robot>
