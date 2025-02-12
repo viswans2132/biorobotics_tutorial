@@ -30,7 +30,7 @@ def generate_launch_description():
     pkg_robot = get_package_share_directory('biorobotics_tutorial')
 
     # Complete file name of the xacro file.
-    xacro_file = os.path.join(pkg_robot, 'models', 'quadruped.xacro')
+    xacro_file = os.path.join(pkg_robot, 'models', 'four_links.xacro')
     assert os.path.exists(xacro_file), "File not found: "+str(xacro_file)
 
     # Process the xacro file to generate URDF and extract the robot description.
