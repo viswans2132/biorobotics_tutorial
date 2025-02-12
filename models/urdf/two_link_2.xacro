@@ -83,7 +83,6 @@
       <origin xyz="0.1 0 0" />
     </xacro:box_inertial>
   </link>
-
   <link name="${box_name}/arm2">
     <!-- Visual block -->
     <visual>
@@ -104,14 +103,22 @@
       <origin xyz="0.1 0 0" />
     </xacro:box_inertial>
   </link>
-
   <!-- Joint between the first link and the new link -->
   <joint name="${box_name}/link_joint1" type="revolute">
-    <origin xyz="0.0 -0.075 0.0" rpy="0 0 0" />
+    <origin xyz="0.2 -0.075 -0.07" rpy="0 0 0" />
     <parent link="${box_name}/box" />
     <child link="${box_name}/arm1" />
     <axis xyz="0 1 0" />
-    <limit lower="${-pi}" upper="${pi}" effort="10.01" velocity="1.01" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
+    <dynamics damping="0.0" friction="0.1"/>
+  </joint>
+  <!-- Joint between the first link and the new link -->
+  <joint name="${box_name}/link_joint11" type="revolute">
+    <origin xyz="0.225 -0.05 0.0" rpy="0 0 0" />
+    <parent link="${box_name}/arm1" />
+    <child link="${box_name}/arm11" />
+    <axis xyz="0 1 0" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
     <dynamics damping="0.0" friction="0.1"/>
   </joint>
   <!-- Gazebo specific properties for the arm link -->
@@ -121,11 +128,11 @@
 
     <!-- Joint between the first link and the new link -->
   <joint name="${box_name}/link_joint2" type="revolute">
-    <origin xyz="0.0 0.075 0.0" rpy="0 0 0" />
+    <origin xyz="0.2 0.075 -0.07" rpy="0 0 0" />
     <parent link="${box_name}/box" />
     <child link="${box_name}/arm2" />
     <axis xyz="0 1 0" />
-    <limit lower="${-pi}" upper="${pi}" effort="10.01" velocity="1.01" />
+    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
     <dynamics damping="0.0" friction="0.1"/>
   </joint>
   <!-- Gazebo specific properties for the arm link -->
@@ -139,20 +146,20 @@
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
     </hardware>
     <joint name="${box_name}/link_joint1">
-      <param name="pos_kp">20</param>
+      <param name="pos_kp">4</param>
       <param name="pos_ki">1</param>
-      <param name="pos_kd">10</param>
-      <param name="pos_max_integral_error">10</param>
+      <param name="pos_kd">1</param>
+      <param name="pos_max_integral_error">1</param>
       <command_interface name="position_pid"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
     <joint name="${box_name}/link_joint2">
-      <param name="pos_kp">20</param>
+      <param name="pos_kp">4</param>
       <param name="pos_ki">1</param>
-      <param name="pos_kd">10</param>
-      <param name="pos_max_integral_error">10</param>
+      <param name="pos_kd">1</param>
+      <param name="pos_max_integral_error">1</param>
       <command_interface name="position_pid"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
