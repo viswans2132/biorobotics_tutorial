@@ -105,18 +105,9 @@
   </link>
   <!-- Joint between the first link and the new link -->
   <joint name="${box_name}/link_joint1" type="revolute">
-    <origin xyz="0.2 -0.075 -0.07" rpy="0 0 0" />
+    <origin xyz="0.0 -0.075 -0.00" rpy="0 0 0" />
     <parent link="${box_name}/box" />
     <child link="${box_name}/arm1" />
-    <axis xyz="0 1 0" />
-    <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
-    <dynamics damping="0.0" friction="0.1"/>
-  </joint>
-  <!-- Joint between the first link and the new link -->
-  <joint name="${box_name}/link_joint11" type="revolute">
-    <origin xyz="0.225 -0.05 0.0" rpy="0 0 0" />
-    <parent link="${box_name}/arm1" />
-    <child link="${box_name}/arm11" />
     <axis xyz="0 1 0" />
     <limit lower="${-pi}" upper="${pi}" effort="50.01" velocity="1.01" />
     <dynamics damping="0.0" friction="0.1"/>
@@ -128,7 +119,7 @@
 
     <!-- Joint between the first link and the new link -->
   <joint name="${box_name}/link_joint2" type="revolute">
-    <origin xyz="0.2 0.075 -0.07" rpy="0 0 0" />
+    <origin xyz="0.0 0.075 -0.0" rpy="0 0 0" />
     <parent link="${box_name}/box" />
     <child link="${box_name}/arm2" />
     <axis xyz="0 1 0" />
