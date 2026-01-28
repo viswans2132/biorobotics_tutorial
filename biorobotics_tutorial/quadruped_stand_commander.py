@@ -39,7 +39,7 @@ def _jn(ns: str, name: str) -> str:
 
 class QuadrupedStandClient(Node): 
     def init(self, namespace: str =“dog”): 
-        super().__init__(“quadruped_stand_action_client”)
+        super().__init__(“quadruped_action_client”)
     self._namespace = namespace self._action_client = ActionClient(self.FollowJointTrajectory, "/joint_trajectory_controller/follow_joint_trajectory")
 
         # Joint order must match the controller's joint list for clarity.
@@ -140,7 +140,7 @@ def main(args=None): rclpy.init(args=args)
     try:
         rclpy.spin(node)
     except SystemExit:
-        rclpy.logging.get_logger("quadruped_stand_action_client").info("Shutting down.")
+        rclpy.logging.get_logger("quadruped_action_client").info("Shutting down.")
     finally:
         node.destroy_node()
         rclpy.shutdown()

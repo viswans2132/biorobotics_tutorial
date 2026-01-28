@@ -20,20 +20,20 @@
   <xacro:property name="body_z" value="0.10"/>
 
   <!-- Leg geometry -->
-  <xacro:property name="hip_len"  value="0.06"/>   <!-- hip cylinder length -->
+  <xacro:property name="hip_len"  value="0.036"/>   <!-- hip cylinder length -->
   <xacro:property name="hip_rad"  value="0.018"/>  <!-- hip cylinder radius -->
 
-  <xacro:property name="thigh_len" value="0.20"/>
+  <xacro:property name="thigh_len" value="0.10"/>
   <xacro:property name="thigh_rad" value="0.020"/>
 
-  <xacro:property name="shank_len" value="0.20"/>
+  <xacro:property name="shank_len" value="0.10"/>
   <xacro:property name="shank_rad" value="0.018"/>
 
-  <xacro:property name="foot_rad" value="0.020"/>
+  <xacro:property name="foot_rad" value="0.025"/>
 
   <!-- Mounting offsets -->
-    <xacro:property name="hip_clear_y" value="${hip_rad + 0.002}"/>   <!-- move hip outside trunk side -->
-  <xacro:property name="hip_drop_z"  value="${hip_rad + 0.010}"/>   <!-- move hip below trunk -->
+    <xacro:property name="hip_clear_y" value="${hip_rad}"/>   <!-- move hip outside trunk side -->
+  <xacro:property name="hip_drop_z"  value="${hip_rad}"/>   <!-- move hip below trunk -->
 
   <!-- Knee joint lateral offset (outward) -->
     <xacro:property name="knee_clear_y" value="0.05"/>
@@ -96,13 +96,20 @@
     <origin xyz="0 0 0.30" rpy="0 0 0"/>
   </joint>
 
+
+  <gazebo reference="trunk">
+    <material>Gazebo/Yellow</material> 
+      <mu1>150.01</mu1>
+      <mu2>150.01</mu2>
+  </gazebo>
+
   <!-- ======= Leg macro ======= -->
   <!-- side = 'l' or 'r' determines y sign; end = 'f' or 'h' determines x sign -->
   <xacro:macro name="leg3dof" params="leg xsign ysign">
     <!-- Mount point at trunk corner, then moved OUTWARD (y) and DOWN (z) -->
     <xacro:property name="x_mount" value="${xsign * body_x/2.0}"/>
     <xacro:property name="y_mount" value="${ysign * (body_y/2.0 + hip_clear_y)}"/>
-    <xacro:property name="z_mount" value="${-(body_z/2.0 + hip_drop_z)}"/>
+    <xacro:property name="z_mount" value="${-(body_z/2.0 - hip_drop_z)}"/>
 
     <!-- Hip link: cylinder "housing" -->
     <link name="${leg}_hip">
@@ -126,55 +133,102 @@
       <!-- ab/ad around X -->
       <axis xyz="1 0 0"/>
       <limit lower="-0.8" upper="0.8" effort="50" velocity="6.0"/>
-      <dynamics damping="0.5" friction="0.0"/>
+      <dynamics damping="0.5" friction="0.01"/>
     </joint>
 
-    <!-- Hip pitch joint at OUTBOARD end of hip cylinder (+X in hip frame) -->
-    <link name="${leg}_thigh">
+    <!-- Hip pitch: cylinder "housing" -->
+    <link name="${leg}_hip_2">
       <visual>
-        <origin xyz="0 0 ${-thigh_len/2.0}" rpy="0 0 0"/>
-        <geometry><cylinder radius="${thigh_rad}" length="${thigh_len}"/></geometry>
+        <!-- rotate cylinder so its axis aligns with +X -->
+        <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+        <geometry><cylinder radius="${hip_rad}" length="${hip_len}"/></geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 ${-thigh_len/2.0}" rpy="0 0 0"/>
-        <geometry><cylinder radius="${thigh_rad}" length="${thigh_len}"/></geometry>
+        <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+        <geometry><cylinder radius="${hip_rad}" length="${hip_len}"/></geometry>
       </collision>
-      <xacro:inertial_cyl m="${m_thigh}" r="${thigh_rad}" l="${thigh_len}" axis="z"/>
+      <!-- inertia computed in link frame (cyl along z), but we're rotating visual/collision only; good enough -->
+      <xacro:inertial_cyl m="${m_hip}" r="${hip_rad}" l="${hip_len}" axis="z"/>
     </link>
 
     <joint name="${leg}_hip_pitch" type="revolute">
       <parent link="${leg}_hip"/>
-      <child link="${leg}_thigh"/>
-      <!-- move to the side/outboard end of hip cylinder -->
-      <origin xyz="${hip_len/2.0} 0 0" rpy="0 0 0"/>
-      <!-- pitch around Y -->
+      <child link="${leg}_hip_2"/>
+      <origin xyz="0.0 0.0 ${-2*hip_drop_z}" rpy="0 0 0"/>
+      <!-- ab/ad around X -->
       <axis xyz="0 1 0"/>
-      <limit lower="-1.5" upper="1.5" effort="60" velocity="8.0"/>
-      <dynamics damping="0.5" friction="0.0"/>
+      <limit lower="-1.3" upper="1.3" effort="50" velocity="6.0"/>
+      <dynamics damping="0.5" friction="0.01"/>
     </joint>
 
-    <!-- Shank -->
+    <!-- Thigh Link: cylinder -->
+    <link name="${leg}_thigh">
+      <visual>
+        <!-- rotate cylinder so its axis aligns with +X -->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="${thigh_rad}" length="${thigh_len}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="${thigh_rad}" length="${thigh_len}"/></geometry>
+      </collision>
+      <!-- inertia computed in link frame (cyl along z), but we're rotating visual/collision only; good enough -->
+      <xacro:inertial_cyl m="${m_thigh}" r="${thigh_rad}" l="${thigh_len}" axis="z"/>
+    </link>
+
+    <joint name="${leg}_hip_thigh" type="fixed">
+      <parent link="${leg}_hip_2"/>
+      <child link="${leg}_thigh"/>
+      <origin xyz="0 0 ${-hip_drop_z - (thigh_len/2.0)}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Knee pitch: cylinder "housing" -->
+    <link name="${leg}_knee">
+      <visual>
+        <!-- rotate cylinder so its axis aligns with +X -->
+        <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+        <geometry><cylinder radius="${hip_rad}" length="${hip_len}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+        <geometry><cylinder radius="${hip_rad}" length="${hip_len}"/></geometry>
+      </collision>
+      <!-- inertia computed in link frame (cyl along z), but we're rotating visual/collision only; good enough -->
+      <xacro:inertial_cyl m="${m_hip}" r="${hip_rad}" l="${hip_len}" axis="z"/>
+    </link>
+
+    <joint name="${leg}_knee_pitch" type="revolute">
+      <parent link="${leg}_thigh"/>
+      <child link="${leg}_knee"/>
+      <origin xyz="0.0 0.0 ${-hip_drop_z - (thigh_len/2.0)}" rpy="0 0 0"/>
+      <!-- ab/ad around X -->
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.3" upper="1.3" effort="50" velocity="6.0"/>
+      <dynamics damping="0.5" friction="0.01"/>
+    </joint>
+
+
+    <!-- Thigh Link: cylinder -->
     <link name="${leg}_shank">
       <visual>
-        <origin xyz="0 0 ${-shank_len/2.0}" rpy="0 0 0"/>
+        <!-- rotate cylinder so its axis aligns with +X -->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry><cylinder radius="${shank_rad}" length="${shank_len}"/></geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 ${-shank_len/2.0}" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry><cylinder radius="${shank_rad}" length="${shank_len}"/></geometry>
       </collision>
-      <xacro:inertial_cyl m="${m_shank}" r="${shank_rad}" l="${shank_len}" axis="z"/>
+      <!-- inertia computed in link frame (cyl along z), but we're rotating visual/collision only; good enough -->
+      <xacro:inertial_cyl m="${m_thigh}" r="${shank_rad}" l="${shank_len}" axis="z"/>
     </link>
 
-    <joint name="${leg}_knee" type="revolute">
-      <parent link="${leg}_thigh"/>
+    <joint name="${leg}_knee_shank" type="fixed">
+      <parent link="${leg}_knee"/>
       <child link="${leg}_shank"/>
-      <!-- bottom of thigh, but also shifted outward in Y so the shank is "side + below" -->
-      <origin xyz="${xsign * knee_fwd_x} ${ysign * knee_clear_y} ${-thigh_len}" rpy="0 0 0" />
-      <axis xyz="0 1 0"/>
-      <limit lower="-2.7" upper="0.1" effort="60" velocity="10.0"/>
-      <dynamics damping="0.3" friction="0.0"/>
+      <origin xyz="0 0 ${-hip_drop_z - (shank_len/2.0)}" rpy="0 0 0"/>
     </joint>
+
 
     <!-- Foot -->
     <link name="${leg}_foot">
@@ -196,8 +250,42 @@
     <joint name="${leg}_ankle_fixed" type="fixed">
       <parent link="${leg}_shank"/>
       <child link="${leg}_foot"/>
-      <origin xyz="0 0 ${-shank_len}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${-shank_len/2}" rpy="0 0 0"/>
     </joint>
+
+
+
+    <gazebo reference="${leg}_hip">
+      <material>Gazebo/Blue</material> 
+        <mu1>10.01</mu1>
+        <mu2>1.01</mu2>
+    </gazebo>
+
+    <gazebo reference="${leg}_hip_2">
+      <material>Gazebo/Green</material> 
+        <mu1>10.01</mu1>
+        <mu2>1.01</mu2>
+    </gazebo>
+    <gazebo reference="${leg}_knee">
+      <material>Gazebo/Red</material> 
+        <mu1>10.01</mu1>
+        <mu2>1.01</mu2>
+    </gazebo>
+    <gazebo reference="${leg}_thigh">
+      <material>Gazebo/Grey</material> 
+        <mu1>10.01</mu1>
+        <mu2>1.01</mu2>
+    </gazebo>
+    <gazebo reference="${leg}_shank">
+      <material>Gazebo/Grey</material> 
+        <mu1>10.01</mu1>
+        <mu2>1.01</mu2>
+    </gazebo>
+    <gazebo reference="${leg}_foot">
+      <material>Gazebo/Orange</material> 
+        <mu1>10.01</mu1>
+        <mu2>1.01</mu2>
+    </gazebo>
   </xacro:macro>
 
   <!-- 4 legs -->
@@ -218,28 +306,8 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="lf_hip_pitch">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="lf_knee">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
 
     <joint name="rf_hip_abd">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="rf_hip_pitch">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="rf_knee">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -250,28 +318,56 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="lh_hip_pitch">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-    <joint name="lh_knee">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
 
     <joint name="rh_hip_abd">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
+    </joint> 
+
+    <joint name="lf_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
     </joint>
+
+    <joint name="rf_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="lh_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
     <joint name="rh_hip_pitch">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="rh_knee">
+
+    <joint name="lf_knee_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rf_knee_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="lh_knee_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rh_knee_pitch">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>

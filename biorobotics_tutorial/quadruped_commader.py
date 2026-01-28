@@ -17,7 +17,7 @@ import numpy as np
 
 class TwoLinkControllerClient(Node):
     def __init__(self, namespace=''):
-        super().__init__('two_link_control_action_client')
+        super().__init__('quadruped_action_client')
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
@@ -32,15 +32,22 @@ class TwoLinkControllerClient(Node):
     def send_goal(self, angle):
         goal_msg = FollowJointTrajectory.Goal()
 
-        joint_name = [self._namespace + "/link_joint1", 
-                        self._namespace + "/link_joint2", 
-                        self._namespace + "/link_joint11", 
-                        self._namespace + "/link_joint22"]
-
+        joint_name = ["lf_hip_abd",
+                        "rf_hip_abd",
+                        "lh_hip_abd", 
+                        "rh_hip_abd",
+                        "lf_hip_pitch",
+                        "rf_hip_pitch",
+                        "lh_hip_pitch", 
+                        "rh_hip_pitch",
+                        "lf_knee_pitch",
+                        "rf_knee_pitch",
+                        "lh_knee_pitch", 
+                        "rh_knee_pitch"]
         points = []
         point = JointTrajectoryPoint()
         point.time_from_start = Duration(seconds=1, nanoseconds=0).to_msg()
-        point.positions = [angle, angle, angle, angle]
+        point.positions = [-angle/4, angle/4, -angle/4, angle/4, angle, angle, -angle, -angle, -2*angle, -2*angle, 2*angle, 2*angle]
 
         points.append(point)
 

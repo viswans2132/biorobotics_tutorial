@@ -24,16 +24,16 @@ joint_trajectory_controller:
     joints:
       - lf_hip_abd
       - lf_hip_pitch
-      - lf_knee
+      - lf_knee_pitch
       - rf_hip_abd
       - rf_hip_pitch
-      - rf_knee
+      - rf_knee_pitch
       - lh_hip_abd
       - lh_hip_pitch
-      - lh_knee
+      - lh_knee_pitch
       - rh_hip_abd
       - rh_hip_pitch
-      - rh_knee
+      - rh_knee_pitch
     command_interfaces:
       - position
     state_interfaces:
@@ -54,14 +54,14 @@ forward_position_controller:
     joints:
       - lf_hip_abd
       - lf_hip_pitch
-      - lf_knee
+      - lf_knee_pitch
       - rf_hip_abd
       - rf_hip_pitch
-      - rf_knee
+      - rf_knee_pitch
       - lh_hip_abd
       - lh_hip_pitch
-      - lh_knee
+      - lh_knee_pitch
       - rh_hip_abd
       - rh_hip_pitch
-      - rh_knee
+      - rh_knee_pitch
     interface_name: position
