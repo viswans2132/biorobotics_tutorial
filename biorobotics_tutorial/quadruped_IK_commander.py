@@ -48,6 +48,18 @@ JOINT_ORDER = [
 ]
 
 
+def build_positions_only_one_leg(self, leg: str, q_leg: tuple[float, float, float]):
+    out = []
+    for j in JOINT_ORDER:
+        if j.startswith(leg + "_"):
+            if j.endswith("hip_abd"): out.append(q_leg[0])
+            elif j.endswith("hip_pitch"): out.append(q_leg[1])
+            elif j.endswith("knee_pitch"): out.append(q_leg[2])
+        else:
+            out.append(self._joint_pos.get(j, 0.0))
+    return out
+
+
 def Rx(a: float) -> np.ndarray:
     c, s = math.cos(a), math.sin(a)
     return np.array([
@@ -161,11 +173,13 @@ class TwoLinkControllerClient(Node):
 
         self._joint_state_pos: Dict[str, float] = {}
         self._received_joint_state = False
+        self._have_state = False
+        self._joint_pos = {}
 
     def state_callback(self, msg: JointState):
         if msg.name and msg.position and len(msg.name) == len(msg.position):
-            self._joint_state_pos = {n: float(p) for n, p in zip(msg.name, msg.position)}
-            self._received_joint_state = True
+            self._joint_pos = {n: float(p) for n, p in zip(msg.name, msg.position)}
+            self._have_state = True
 
     def _current_leg_q(self, leg: str) -> np.ndarray:
         return np.array([
@@ -212,6 +226,15 @@ class TwoLinkControllerClient(Node):
         return out
 
     def send_goal_from_feet(self, feet_trunk: Dict[str, np.ndarray], duration_s: float = 1.0):
+        if not self._have_state:
+            self.get_logger().info("Waiting for /joint_states (need to hold other legs)...")
+            t0 = self.get_clock().now()
+            while rclpy.ok() and not self._have_state:
+                rclpy.spin_once(self, timeout_sec=0.1)
+                if (self.get_clock().now() - t0).nanoseconds > int(3e9):
+                    self.get_logger().error("Timeout waiting for /joint_states")
+                    return
+
         joint_positions = self.foot_targets_to_joint_positions(feet_trunk)
         if joint_positions is None:
             return
