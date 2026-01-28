@@ -1,0 +1,67 @@
+# ROS 2 control controller configuration for dog_quadruped.xacro
+# Joints (12): 3 per leg (joint_1, joint_2, knee)
+#
+# Use with controller_manager, e.g. in your bringup launch:
+#   parameters=[PathJoinSubstitution([pkg_share, "config", "dog_controllers.yaml"])]
+
+controller_manager:
+  ros__parameters:
+    update_rate: 250  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # Send FollowJointTrajectory goals to this controller
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    # Simple direct command controller (Float64MultiArray on ~/commands)
+    forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - lf_joint_1
+      - lf_joint_2
+      - lf_joint_3
+      - rf_joint_1
+      - rf_joint_2
+      - rf_joint_3
+      - lh_joint_1
+      - lh_joint_2
+      - lh_joint_3
+      - rh_joint_1
+      - rh_joint_2
+      - rh_joint_3
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    # For position-controlled sims/hardware, keep open_loop_control true.
+    # If you have real velocity feedback and want better tracking, you can set it false.
+    open_loop_control: true
+    allow_partial_joints_goal: false
+    constraints:
+      stopped_velocity_tolerance: 0.5
+      goal_time: 0.0
+      # Per-joint tolerances (optional)
+      # lf_joint_1: { trajectory: 0.2, goal: 0.1 }
+
+forward_position_controller:
+  ros__parameters:
+    joints:
+      - lf_joint_1
+      - lf_joint_2
+      - lf_joint_3
+      - rf_joint_1
+      - rf_joint_2
+      - rf_joint_3
+      - lh_joint_1
+      - lh_joint_2
+      - lh_joint_3
+      - rh_joint_1
+      - rh_joint_2
+      - rh_joint_3
+    interface_name: position
