@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('share', package_name, 'models'), glob('models/*/*')),
+        (os.path.join('share', package_name, 'worlds'), glob('worlds/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,7 +26,7 @@ setup(
     entry_points={
         'console_scripts': [
         'spawn_bot = biorobotics_tutorial.spawn_bot:main',
-        'two_link_controller = biorobotics_tutorial.two_link_controller:main'
+        'two_link_controller = biorobotics_tutorial.two_link_controller:main',
         'joint_commander = biorobotics_tutorial.joint_commander:main'
         ],
     },

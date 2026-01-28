@@ -102,7 +102,7 @@
   <!-- Interface the plugin with the movable joints -->
   <ros2_control name="GazeboSystem" type="system">
     <hardware>
-      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
     <joint name="${box_name}/link_joint">
       <command_interface name="position">
@@ -117,9 +117,11 @@
     </joint>
   </ros2_control>
   <!-- Gazebo plugin to enable control of joints -->
+  
   <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find biorobotics_tutorial)/models/two_link_config_1.yaml</parameters>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>/ros_ws/src/biorobotics_tutorial/models/config/two_link_config_1.yaml</parameters>
     </plugin>
   </gazebo>
 </robot>

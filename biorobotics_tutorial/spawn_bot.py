@@ -2,7 +2,7 @@
 import os
 import sys
 import rclpy
-from gazebo_msgs.srv import SpawnEntity
+from gz_msgs.srv import SpawnEntity
 
 def main(args=None):
     rclpy.init(args=args)

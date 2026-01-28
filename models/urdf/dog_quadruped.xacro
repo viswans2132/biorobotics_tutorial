@@ -1,0 +1,285 @@
+<?xml version="1.0"?>
+<robot name="dog_quadruped" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- =====================
+       Global properties
+       ===================== -->
+  <xacro:property name="robot" value="dog"/>
+  <xacro:property name="mass_body" value="6.0"/>
+  <xacro:property name="mass_leg" value="0.5"/>
+
+  <!-- Body dimensions -->
+  <xacro:property name="body_x" value="0.60"/>
+  <xacro:property name="body_y" value="0.30"/>
+  <xacro:property name="body_z" value="0.15"/>
+
+  <!-- Leg geometry (simple box links) -->
+  <xacro:property name="hip_x" value="0.05"/>
+  <xacro:property name="hip_y" value="0.05"/>
+  <xacro:property name="hip_z" value="0.05"/>
+
+  <xacro:property name="thigh_x" value="0.05"/>
+  <xacro:property name="thigh_y" value="0.05"/>
+  <xacro:property name="thigh_z" value="0.20"/>
+
+  <xacro:property name="shank_x" value="0.04"/>
+  <xacro:property name="shank_y" value="0.04"/>
+  <xacro:property name="shank_z" value="0.20"/>
+
+  <xacro:property name="foot_r" value="0.02"/>
+
+  <!-- Hip locations relative to body center (in base_link/body frame) -->
+  <xacro:property name="x_front" value="${ body_x/2 - 0.10 }"/>
+  <xacro:property name="x_rear"  value="${ -body_x/2 + 0.10 }"/>
+  <xacro:property name="y_left"  value="${ body_y/2 }"/>
+  <xacro:property name="y_right" value="${ -body_y/2 }"/>
+  <xacro:property name="z_hip"   value="${ -body_z/2 }"/>
+
+  <!-- =====================
+       Inertia helpers
+       ===================== -->
+  <xacro:macro name="box_inertia" params="x y z mass">
+    <inertia ixx="${0.0833333 * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+             iyy="${0.0833333 * mass * (x*x + z*z)}" iyz="0.0"
+             izz="${0.0833333 * mass * (x*x + y*y)}" />
+  </xacro:macro>
+
+  <xacro:macro name="box_inertial" params="x y z mass *origin">
+    <inertial>
+      <mass value="${mass}"/>
+      <xacro:insert_block name="origin"/>
+      <xacro:box_inertia x="${x}" y="${y}" z="${z}" mass="${mass}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- =====================
+       Base + body
+       ===================== -->
+  <link name="${robot}/base_link"/>
+
+  <link name="${robot}/trunk">
+    <xacro:box_inertial x="${body_x}" y="${body_y}" z="${body_z}" mass="${mass_body}">
+      <origin xyz="0 0 0"/>
+    </xacro:box_inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${body_x} ${body_y} ${body_z}"/></geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${body_x} ${body_y} ${body_z}"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="${robot}/base_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="${robot}/base_link"/>
+    <child link="${robot}/trunk"/>
+  </joint>
+
+  <!-- =====================
+       Leg macro (3-DoF)
+       hip_abd (roll), hip_pitch, knee_pitch
+       ===================== -->
+  <xacro:macro name="leg" params="prefix x y">
+    <!-- Hip link (small cube) -->
+    <link name="${robot}/${prefix}_hip">
+      <xacro:box_inertial x="${hip_x}" y="${hip_y}" z="${hip_z}" mass="${mass_leg}">
+        <origin xyz="0 0 0"/>
+      </xacro:box_inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><box size="${hip_x} ${hip_y} ${hip_z}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><box size="${hip_x} ${hip_y} ${hip_z}"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Thigh link (box along -Z) -->
+    <link name="${robot}/${prefix}_thigh">
+      <xacro:box_inertial x="${thigh_x}" y="${thigh_y}" z="${thigh_z}" mass="${mass_leg}">
+        <origin xyz="0 0 ${-thigh_z/2}"/>
+      </xacro:box_inertial>
+      <visual>
+        <origin xyz="0 0 ${-thigh_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${thigh_x} ${thigh_y} ${thigh_z}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-thigh_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${thigh_x} ${thigh_y} ${thigh_z}"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Shank link (box along -Z) -->
+    <link name="${robot}/${prefix}_shank">
+      <xacro:box_inertial x="${shank_x}" y="${shank_y}" z="${shank_z}" mass="${mass_leg}">
+        <origin xyz="0 0 ${-shank_z/2}"/>
+      </xacro:box_inertial>
+      <visual>
+        <origin xyz="0 0 ${-shank_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${shank_x} ${shank_y} ${shank_z}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-shank_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${shank_x} ${shank_y} ${shank_z}"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Foot (sphere) -->
+    <link name="${robot}/${prefix}_foot">
+      <inertial>
+        <mass value="${0.05}"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><sphere radius="${foot_r}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><sphere radius="${foot_r}"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Joints -->
+    <!-- Hip ab/ad: rotate about X (roll) -->
+    <joint name="${robot}/${prefix}_hip_abd" type="revolute">
+      <origin xyz="${x} ${y} ${z_hip}" rpy="0 0 0"/>
+      <parent link="${robot}/trunk"/>
+      <child link="${robot}/${prefix}_hip"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="-0.6" upper="0.6" effort="40" velocity="8"/>
+      <dynamics damping="0.2" friction="0.0"/>
+    </joint>
+
+    <!-- Hip pitch: rotate about Y -->
+    <joint name="${robot}/${prefix}_hip_pitch" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${robot}/${prefix}_hip"/>
+      <child link="${robot}/${prefix}_thigh"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.2" upper="1.2" effort="40" velocity="8"/>
+      <dynamics damping="0.2" friction="0.0"/>
+    </joint>
+
+    <!-- Knee pitch: rotate about Y, located at end of thigh -->
+    <joint name="${robot}/${prefix}_knee" type="revolute">
+      <origin xyz="0 0 ${-thigh_z}" rpy="0 0 0"/>
+      <parent link="${robot}/${prefix}_thigh"/>
+      <child link="${robot}/${prefix}_shank"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-2.2" upper="0.0" effort="40" velocity="10"/>
+      <dynamics damping="0.2" friction="0.0"/>
+    </joint>
+
+    <!-- Fixed joint from shank end to foot -->
+    <joint name="${robot}/${prefix}_ankle_fixed" type="fixed">
+      <origin xyz="0 0 ${-shank_z}" rpy="0 0 0"/>
+      <parent link="${robot}/${prefix}_shank"/>
+      <child link="${robot}/${prefix}_foot"/>
+    </joint>
+
+    <!-- Gazebo friction for the foot -->
+    <gazebo reference="${robot}/${prefix}_foot">
+      <mu1>2.0</mu1>
+      <mu2>2.0</mu2>
+      <kp>100000.0</kp>
+      <kd>10.0</kd>
+      <material>Gazebo/Black</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- =====================
+       Instantiate 4 legs
+       ===================== -->
+  <xacro:leg prefix="lf" x="${x_front}" y="${y_left}"/>
+  <xacro:leg prefix="rf" x="${x_front}" y="${y_right}"/>
+  <xacro:leg prefix="lh" x="${x_rear}"  y="${y_left}"/>
+  <xacro:leg prefix="rh" x="${x_rear}"  y="${y_right}"/>
+
+  <!-- =====================
+       ros2_control (Gazebo)
+       ===================== -->
+  <xacro:arg name="controllers_file" default="dog_controllers.yaml"/>
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <!-- For Gazebo Classic + gazebo_ros2_control -->
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <joint name="dog/lf_hip_abd">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/lf_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/lf_knee">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/rf_hip_abd">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/rf_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/rf_knee">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/lh_hip_abd">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/lh_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/lh_knee">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/rh_hip_abd">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/rh_hip_pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>  
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="dog/rh_knee">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Gazebo plugin to enable control of joints -->
+  <gazebo>
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>/ros_ws/src/biorobotics_tutorial/models/config/dog_quadruped_config.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>
