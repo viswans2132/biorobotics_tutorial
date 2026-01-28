@@ -4,7 +4,7 @@ ros2_control joint_trajectory_controller.
 
 This is adapted from the user’s two_link_controller.py
 (FollowJointTrajectory action client) fileciteturn0file0 and extended
-to command 12 joints (3 per leg) to a predefined “stand” pose.
+to command 12 joints (3 per leg) to a predefined “stand" pose.
 
 Usage: ros2 run quadruped_stand_commander.py [namespace] [duration_sec]
 
@@ -12,51 +12,50 @@ Examples: # If your joint names are exactly like: dog/lf_hip_abd,
 dog/lf_hip_pitch, … python3 quadruped_stand_commander.py dog 2.0
 
 # If you used no prefix in joint names, pass empty string: python3
-quadruped_stand_commander.py “” 2.0 '''
+quadruped_stand_commander.py “" 2.0 '''
 
 import sys 
 from typing import List
 
 import rclpy 
 from rclpy.action import ActionClient 
-from rclpy.duration
-import Duration 
+from rclpy.duration import Duration 
 from rclpy.node import Node
 
 from control_msgs.action import FollowJointTrajectory 
-from
-trajectory_msgs.msg import JointTrajectoryPoint
+from trajectory_msgs.msg import JointTrajectoryPoint
 
 def _jn(ns: str, name: str) -> str: 
     """Build joint name with optional namespace prefix."""
-    ns = (ns or ““).strip() 
-    if ns ==”“: 
-    return name 
+    ns = (ns or "").strip()
+    if ns == "": 
+        return name 
     # Support both ‘dog’ and ‘/dog’ inputs 
-    if ns.startswith(”/“): 
+    if ns.startswith("/"): 
         ns = ns[1:]
-    return f”{ns}/{name}”
+    return f"{ns}/{name}"
 
 class QuadrupedStandClient(Node): 
-    def init(self, namespace: str =“dog”): 
-        super().__init__(“quadruped_action_client”)
-    self._namespace = namespace self._action_client = ActionClient(self.FollowJointTrajectory, "/joint_trajectory_controller/follow_joint_trajectory")
+    def init(self, namespace: str ="dog"): 
+        super().__init__("quadruped_stand_action_client")
+    self._namespace = namespace 
+    self._action_client = ActionClient(self.FollowJointTrajectory, "/joint_trajectory_controller/follow_joint_trajectory")
 
-        # Joint order must match the controller's joint list for clarity.
-        self.joint_names: List[str] = [
-            _jn(self._namespace, "lf_hip_abd"),
-            _jn(self._namespace, "lf_hip_pitch"),
-            _jn(self._namespace, "lf_knee"),
-            _jn(self._namespace, "rf_hip_abd"),
-            _jn(self._namespace, "rf_hip_pitch"),
-            _jn(self._namespace, "rf_knee"),
-            _jn(self._namespace, "lh_hip_abd"),
-            _jn(self._namespace, "lh_hip_pitch"),
-            _jn(self._namespace, "lh_knee"),
-            _jn(self._namespace, "rh_hip_abd"),
-            _jn(self._namespace, "rh_hip_pitch"),
-            _jn(self._namespace, "rh_knee"),
-        ]
+    # Joint order must match the controller's joint list for clarity.
+    self.joint_names: List[str] = [
+        _jn(self._namespace, "lf_hip_abd"),
+        _jn(self._namespace, "lf_hip_pitch"),
+        _jn(self._namespace, "lf_knee"),
+        _jn(self._namespace, "rf_hip_abd"),
+        _jn(self._namespace, "rf_hip_pitch"),
+        _jn(self._namespace, "rf_knee"),
+        _jn(self._namespace, "lh_hip_abd"),
+        _jn(self._namespace, "lh_hip_pitch"),
+        _jn(self._namespace, "lh_knee"),
+        _jn(self._namespace, "rh_hip_abd"),
+        _jn(self._namespace, "rh_hip_pitch"),
+        _jn(self._namespace, "rh_knee"),
+    ]
 
     def send_stand_goal(self, duration_sec: float = 2.0):
         """
@@ -122,8 +121,9 @@ class QuadrupedStandClient(Node):
         self.get_logger().info(f"Result: {result}")
         raise SystemExit
 
-def main(args=None): rclpy.init(args=args)
 
+def main(args=None): 
+    rclpy.init(args=args)
     # Parse CLI args
     # argv[1] = namespace/prefix, argv[2] = duration_sec (optional)
     namespace = "dog"
@@ -145,4 +145,6 @@ def main(args=None): rclpy.init(args=args)
         node.destroy_node()
         rclpy.shutdown()
 
-if name == “main”: main()
+
+if __name__ == "__main__": 
+    main()
