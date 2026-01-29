@@ -17,21 +17,21 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from sensor_msgs.msg import JointState
 
 body_x, body_y, body_z = 0.40, 0.16, 0.10
-hip_len = 0.06
-thigh_len = 0.20
-shank_len = 0.20
+hip_len = 0.036
+thigh_len = 0.10
+shank_len = 0.10
 
 hip_rad = 0.018
-hip_clear_y = hip_rad + 0.002
-hip_drop_z  = hip_rad + 0.010
+hip_clear_y = hip_rad
+hip_drop_z  = hip_rad
 
-knee_clear_y = 0.05
-knee_fwd_x   = 0.02
+knee_clear_y = 0.0
+knee_fwd_x   = 0.0
 
 JOINT_LIMITS = {
     "abd":  (-0.8, 0.8),
-    "hip":  (-1.5, 1.5),
-    "knee": (-2.7, 0.1),
+    "hip":  (-1.3, 1.3),
+    "knee": (-1.3, 1.3),
 }
 
 LEG_SIGNS = {
@@ -80,7 +80,7 @@ def in_limits(q: float, lim: Tuple[float, float]) -> bool:
 def leg_mount_in_trunk(xsign: int, ysign: int) -> np.ndarray:
     x_mount = xsign * (body_x / 2.0)
     y_mount = ysign * (body_y / 2.0 + hip_clear_y)
-    z_mount = -(body_z / 2.0 + hip_drop_z)
+    z_mount = -(body_z / 2.0 - hip_drop_z)
     return np.array([x_mount, y_mount, z_mount], dtype=float)
 
 
@@ -91,7 +91,7 @@ def ik_leg_3dof(p_trunk: np.ndarray, xsign: int, ysign: int, return_all: bool=Fa
 
     xoff = xsign * knee_fwd_x
     yoff = ysign * knee_clear_y
-    L1, L2 = thigh_len, shank_len
+    L1, L2 = thigh_len + 2.0 * hip_drop_z, shank_len + hip_drop_z
 
     vy, vz = float(v[1]), float(v[2])
     r = math.hypot(vy, vz)
@@ -108,7 +108,7 @@ def ik_leg_3dof(p_trunk: np.ndarray, xsign: int, ysign: int, return_all: bool=Fa
             continue
 
         s = Rx(-q_abd).dot(v)
-        p2 = s - np.array([hip_len / 2.0, 0.0, 0.0], dtype=float)
+        p2 = s + np.array([0.0, 0.0, 2.0 * hip_drop_z], dtype=float)
         tx, tz = float(p2[0]), float(p2[2])
         rho2 = tx*tx + tz*tz
 
@@ -145,10 +145,10 @@ def ik_leg_3dof(p_trunk: np.ndarray, xsign: int, ysign: int, return_all: bool=Fa
 
 def default_stance() -> Dict[str, np.ndarray]:
     return {
-        "lf": np.array([+0.28, +0.12, -0.30], dtype=float),
-        "rf": np.array([+0.28, -0.12, -0.30], dtype=float),
-        "lh": np.array([-0.28, +0.12, -0.30], dtype=float),
-        "rh": np.array([-0.28, -0.12, -0.30], dtype=float),
+        "lf": np.array([0.20, 0.17, -0.30], dtype=float),
+        "rf": np.array([0.20, -0.17, -0.30], dtype=float),
+        "lh": np.array([-0.20, 0.17, -0.30], dtype=float),
+        "rh": np.array([-0.20, -0.17, -0.30], dtype=float),
     }
 
 
