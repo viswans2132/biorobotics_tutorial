@@ -20,6 +20,18 @@ def make_keyframes(z_stance: float, z_swing: float) -> List[Dict[str, object]]:
          "lh": (-0.18, 0.17, z_stance), "rh": (-0.18, -0.17, z_stance)},
 
         # shift_1 (+3 cm)
+        {"name": "step1_lift",
+         "lf": (0.18,  0.17, z_swing), "rf": (0.18, -0.17, z_stance),
+         "lh": (-0.18, 0.17, z_stance), "rh": (-0.18, -0.17, z_swing)},
+        {"name": "step1_swing",
+         "lf": (0.24,  0.17, z_swing), "rf": (0.18, -0.17, z_stance),
+         "lh": (-0.18, 0.17, z_stance), "rh": (-0.12, -0.17, z_swing)},
+        {"name": "step1_down",
+         "lf": (0.24,  0.17, z_stance), "rf": (0.18, -0.17, z_stance),
+         "lh": (-0.18, 0.17, z_stance), "rh": (-0.12, -0.17, z_stance)},
+        {"name": "shift_1",
+         "lf": (0.21,  0.17, z_stance), "rf": (0.15, -0.17, z_stance),
+         "lh": (-0.21, 0.17, z_stance), "rh": (-0.15, -0.17, z_stance)},
     ]
 
 
