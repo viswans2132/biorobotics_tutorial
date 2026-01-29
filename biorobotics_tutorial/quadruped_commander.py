@@ -47,7 +47,7 @@ class TwoLinkControllerClient(Node):
         points = []
         point = JointTrajectoryPoint()
         point.time_from_start = Duration(seconds=1, nanoseconds=0).to_msg()
-        point.positions = [-angle/4, angle/4, -angle/4, angle/4, angle, angle, -angle, -angle, -2*angle, -2*angle, 2*angle, 2*angle]
+        point.positions = [-angle/2, angle/2, -angle/2, angle/2, angle, angle, -angle, -angle, -2*angle, -2*angle, 2*angle, 2*angle]
 
         points.append(point)
 
