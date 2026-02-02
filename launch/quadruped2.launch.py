@@ -20,7 +20,7 @@ def generate_launch_description():
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
     pkg_robot = get_package_share_directory('biorobotics_tutorial')
 
-    xacro_file = os.path.join(pkg_robot, 'models', 'crawler_quadruped.xacro')
+    xacro_file = os.path.join(pkg_robot, 'models', 'dog_quadruped2.xacro')
     assert os.path.exists(xacro_file), f"File not found: {xacro_file}"
 
     robot_desc = xacro.process_file(xacro_file).toxml()
