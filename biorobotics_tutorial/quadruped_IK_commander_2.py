@@ -85,62 +85,12 @@ def leg_mount_in_trunk(xsign: int, ysign: int) -> np.ndarray:
 
 
 def ik_leg_3dof(p_trunk: np.ndarray, xsign: int, ysign: int, return_all: bool=False):
-    p = np.asarray(p_trunk, dtype=float).reshape(3)
-    r0 = leg_mount_in_trunk(xsign, ysign)
-    v = p - r0
+    """
+    Please enter your code for the inverse kinematics here.
 
-    xoff = xsign * knee_fwd_x
-    yoff = ysign * knee_clear_y
-    L1, L2 = thigh_len + 2.0 * hip_drop_z, shank_len + hip_drop_z
+    """
 
-    vy, vz = float(v[1]), float(v[2])
-    r = math.hypot(vy, vz)
-    if r < abs(yoff):
-        return [] if return_all else None
-
-    phi = math.atan2(vz, vy)
-    delta = math.acos(clamp(yoff / r, -1.0, 1.0))
-    abd_candidates = [phi - delta, phi + delta]
-
-    sols = []
-    for q_abd in abd_candidates:
-        if not in_limits(q_abd, JOINT_LIMITS["abd"]):
-            continue
-
-        s = Rx(-q_abd).dot(v)
-        p2 = s + np.array([0.0, 0.0, 2.0 * hip_drop_z], dtype=float)
-        tx, tz = float(p2[0]), float(p2[2])
-        rho2 = tx*tx + tz*tz
-
-        R = math.hypot(L1, xoff)
-        D = (rho2 - (xoff*xoff + L1*L1 + L2*L2)) / (2.0 * L2)
-        if abs(D) > R:
-            continue
-
-        alpha = math.atan2(xoff, L1)
-        gamma = math.acos(clamp(D / R, -1.0, 1.0))
-        knee_candidates = [gamma - alpha, -gamma - alpha]
-
-        for q_knee in knee_candidates:
-            if not in_limits(q_knee, JOINT_LIMITS["knee"]):
-                continue
-
-            dx = xoff - L2 * math.sin(q_knee)
-            dz = -L1 - L2 * math.cos(q_knee)
-            norm2 = dx*dx + dz*dz
-            if norm2 < 1e-12:
-                continue
-
-            c = (dx*tx + dz*tz) / norm2
-            s_ = (dz*tx - dx*tz) / norm2
-            q_hip = math.atan2(s_, c)
-
-            if not in_limits(q_hip, JOINT_LIMITS["hip"]):
-                continue
-
-            sols.append((q_abd, q_hip, q_knee))
-
-    return sols if return_all else (sols[0] if sols else None)
+    return angles
 
 
 def default_stance() -> Dict[str, np.ndarray]:
