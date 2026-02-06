@@ -108,6 +108,12 @@
     <xacro:inertial_box m="10" x="0.1" y="0.1" z="0.5"/>
   </link>
 
+  <gazebo reference="pillar">
+    <material>Gazebo/Grey</material> 
+      <mu1>150.01</mu1>
+      <mu2>150.01</mu2>
+  </gazebo>
+
   <joint name="platform_to_pillar" type="fixed">
     <parent link="platform"/>
     <child link="pillar"/>
@@ -170,7 +176,7 @@
       <origin xyz="${x_mount} ${y_mount} ${z_mount}" rpy="0 0 0"/>
       <!-- ab/ad around X -->
       <axis xyz="0 0 1"/>
-      <limit lower="-1.5" upper="1.5" effort="50" velocity="6.0"/>
+      <limit lower="${-pi}" upper="${pi}" effort="50" velocity="6.0"/>
       <dynamics damping="0.5" friction="0.01"/>
     </joint>
 
@@ -195,7 +201,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
       <!-- ab/ad around X -->
       <axis xyz="0 1 0"/>
-      <limit lower="-2.0" upper="2.0" effort="50" velocity="6.0"/>
+      <limit lower="${-pi}" upper="${pi}" effort="50" velocity="6.0"/>
       <dynamics damping="0.5" friction="0.01"/>
     </joint>
 
@@ -241,7 +247,7 @@
       <origin xyz="0.0 0.0 ${-hip_drop_z - (thigh_len/2.0)}" rpy="0 0 0"/>
       <!-- ab/ad around X -->
       <axis xyz="0 1 0"/>
-      <limit lower="-2.0" upper="2.0" effort="50" velocity="6.0"/>
+      <limit lower="${-pi}" upper="${pi}" effort="50" velocity="6.0"/>
       <dynamics damping="0.5" friction="0.01"/>
     </joint>
 
